@@ -6,17 +6,17 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
-from src.config import PROJECT_SOURCE_CODE_DIR
+from src.config import PROJECT_SOURCE_CODE_DIR, CODEQL_DB_PATH, PACKAGE_MODULES_PATH, CODEQL_BIN, CODEQL_DIR
 
 def run_codeql_query(db_path, query_path):
     try:
         subprocess.run(
-            ["codeql", "query", "run", "--database", str(db_path), 
-             "--output=results.bqrs", str(query_path)],
+            [CODEQL_BIN, "query", "run", "--search-path", f"{CODEQL_DIR}/qlpacks",
+             "--database", str(db_path), "--output=results.bqrs", str(query_path)],
             check=True, capture_output=True, text=True
         )
         result = subprocess.run(
-            ["codeql", "bqrs", "decode", "--format=csv", "results.bqrs"],
+            [CODEQL_BIN, "bqrs", "decode", "--format=csv", "results.bqrs"],
             capture_output=True, text=True, check=True
         )
         packages = set()
@@ -105,6 +105,20 @@ def filter_internal_packages(packages, internal_package):
     
     return internal_packages
 
+def extract_packages_from_sources(project_dir: Path) -> set[str]:
+    packages = set()
+    if not project_dir.exists():
+        return packages
+    for java_file in project_dir.rglob("*.java"):
+        try:
+            content = java_file.read_text(encoding="utf-8", errors="ignore")
+            match = re.search(r"^\s*package\s+([a-zA-Z0-9_.]+)\s*;", content, re.MULTILINE)
+            if match:
+                packages.add(match.group(1).strip())
+        except Exception:
+            pass
+    return packages
+
 def main():
     parser = argparse.ArgumentParser(description="Extract internal packages from a Java project")
     parser.add_argument("project_name", help="Name of the project")
@@ -115,14 +129,13 @@ def main():
     internal_package = args.internal_package
     
     iris_root = Path(__file__).parent.parent
-    output_file = iris_root / "data" / "package-names" / f"{project_name}.txt"
+    output_file = Path(PACKAGE_MODULES_PATH) / f"{project_name}.txt"
     query_path = iris_root / "scripts" / "codeql-queries" / "packages.ql"
-    db_path = iris_root / "data" / "codeql-dbs" / project_name
+    db_path = Path(CODEQL_DB_PATH) / project_name
     project_path = Path(PROJECT_SOURCE_CODE_DIR) / project_name
     
     if not internal_package:
         print("Internal package not specified, trying to detect from build files...")
-        
         internal_package = find_maven_group_id(project_path)
         if internal_package:
             print(f"Found Maven groupId: {internal_package}")
@@ -131,23 +144,34 @@ def main():
             if internal_package:
                 print(f"Found Gradle group: {internal_package}")
     
-    if not internal_package:
-        print("Error: Could not detect internal package name.")
-        print("Please specify it with --internal-package (e.g., --internal-package org.keycloak)")
-        sys.exit(1) 
-    
-    print(f"Running CodeQL query for all packages in {project_name}...")
+    print(f"Extracting packages for {project_name}...")
     all_packages = run_codeql_query(db_path, query_path)
     if not all_packages:
-        print("No packages found or CodeQL query failed.")
-        return
+        print("CodeQL query returned no packages (missing qlpacks or error). Falling back to direct source scanning...")
+        all_packages = extract_packages_from_sources(project_path)
+    
+    if not all_packages:
+        print("Error: No packages found in project.")
+        sys.exit(1)
+        
     print(f"Found {len(all_packages)} total packages.")
     
-    internal_packages = filter_internal_packages(all_packages, internal_package)
+    if internal_package:
+        internal_packages = filter_internal_packages(all_packages, internal_package)
+    else:
+        internal_packages = []
+        
+    # If groupId didn't match source package names, fallback to all source packages
+    if not internal_packages:
+        internal_packages = list(all_packages)
+        
     excluded_packages = [pkg for pkg in all_packages if pkg not in internal_packages]
-    print("Excluded packages:", excluded_packages)
+    print(f"Internal packages ({len(internal_packages)}):", sorted(internal_packages))
+    if excluded_packages:
+        print(f"Excluded packages ({len(excluded_packages)}):", sorted(excluded_packages))
+        
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         for package in sorted(internal_packages):
             f.write(f"{package}\n")
     

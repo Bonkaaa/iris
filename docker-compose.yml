@@ -1,0 +1,18 @@
+services:
+  iris:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iris:latest
+    container_name: iris_benchmark
+    volumes:
+      - ./z_data:/iris/z_data
+      - ./output:/iris/output
+      - ./src:/iris/src
+      - ./scripts:/iris/scripts
+      - ./.env:/iris/.env
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    working_dir: /iris

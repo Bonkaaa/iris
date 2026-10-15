@@ -1,0 +1,26 @@
+project_slug,file,class,method,signature,method_start,method_end
+perwendel__spark_CVE-2018-9159_2.7.1,src/main/java/spark/resource/ClassPathResource.java,ClassPathResource,equals,boolean equals(Object),225,239
+perwendel__spark_CVE-2016-9177_2.5.1,src/main/java/spark/resource/ClassPathResourceHandler.java,ClassPathResourceHandler,getResource,AbstractFileResolvingResource getResource(String),60,87
+vert-x3__vertx-web_CVE-2018-12542_3.5.3.CR1,vertx-web/src/main/java/io/vertx/ext/web/handler/impl/StaticHandlerImpl.java,StaticHandlerImpl,sendStatic,"void sendStatic(RoutingContext,String)",157,218
+joniles__mpxj_CVE-2020-35460_8.3.4,src/net/sf/mpxj/common/InputStreamHelper.java,InputStreamHelper,writeZipStreamToTempDir,"File writeZipStreamToTempDir(InputStream)",81,121
+apache__flink_CVE-2020-17519_1.11.2,flink-runtime/src/main/java/org/apache/flink/runtime/rest/handler/cluster/JobManagerCustomLogHandler.java,JobManagerCustomLogHandler,getFile,File getFile(HandlerRequest),53,58
+kubernetes-client__java_CVE-2020-8570_client-java-parent-9.0.1,util/src/main/java/io/kubernetes/client/Copy.java,Copy,copyDirectoryFromPod,"void copyDirectoryFromPod(String,String,String,String,Path,boolean)",142,196
+asf__karaf_CVE-2022-22932_4.3.5,obr/src/main/java/org/apache/karaf/obr/command/util/FileUtil.java,FileUtil,unjar,"void unjar(JarInputStream,File)",96,140
+asf__james-project_CVE-2022-22931_3.6.0-1,server/data/data-file/src/main/java/org/apache/james/sieverepository/file/SieveFileRepository.java,SieveFileRepository,enforceRoot,void enforceRoot(File),318,324
+asf__james-project_CVE-2022-22931_3.6.0-2,mailbox/maildir/src/main/java/org/apache/james/mailbox/maildir/MaildirFolder.java,MaildirFolder,validateWithinFolder,MaildirFolder validateWithinFolder(File),108,116
+whitesource__curekit_CVE-2022-23082_1.1.3,src/main/java/com/wss/remediation/WhiteSourceDirectoryManager.java,WhiteSourceDirectoryManager,isFileOutsideDir,"boolean isFileOutsideDir(String,String)",18,25
+DSpace__DSpace_CVE-2022-31195_5.10,dspace-api/src/main/java/org/dspace/app/itemimport/ItemImport.java,ItemImport,unzip,"String unzip(File,String)",1994,2097
+Graylog2__graylog2-server_CVE-2023-41044_5.1.2,graylog2-server/src/main/java/org/graylog2/rest/resources/system/debug/bundle/SupportBundleService.java,SupportBundleService,deleteBundle,void deleteBundle(String),521,525
+yamcs__yamcs_CVE-2023-45278_5.8.6,yamcs-core/src/main/java/org/yamcs/yarch/FileSystemBucket.java,FileSystemBucket,findObject,ObjectProperties findObject(String),206,214
+yamcs__yamcs_CVE-2023-45277_5.8.6,yamcs-core/src/main/java/org/yamcs/yarch/FileSystemBucket.java,FileSystemBucket,findObject,ObjectProperties findObject(String),206,214
+jenkinsci__workflow-cps-global-lib-plugin_CVE-2022-25174_544.vff04fa68714d,src/main/java/org/jenkinsci/plugins/workflow/libs/SCMSourceRetriever.java,SCMSourceRetriever,doRetrieve,"void doRetrieve(String,SCM,FilePath,Run,TaskListener)",86,112
+hibernate__hibernate-validator_CVE-2019-10219_6.0.17.Final,engine/src/main/java/org/hibernate/validator/internal/constraintvalidators/SafeHtmlValidator.java,SafeHtmlValidator,getFragmentAsDocument,Document getFragmentAsDocument(CharSequence),81,95
+nahsra__antisamy_CVE-2022-29577_1.6.6.1,src/main/java/org/owasp/validator/html/scan/AntiSamyDOMScanner.java,AntiSamyDOMScanner,processStyleTag,"boolean processStyleTag(Element,Node)",403,458
+rhuss__jolokia_CVE-2018-1000129_1.4.0,agent/jvm/src/main/java/org/jolokia/jvmagent/handler/JolokiaHttpHandler.java,JolokiaHttpHandler,doHandle,void doHandle(HttpExchange),211,243
+DSpace__DSpace_CVE-2022-31192_5.10,dspace-jspui/src/main/java/org/dspace/app/webui/util/RequestItemManager.java,RequestItemManager,getLinkTokenEmail,"String getLinkTokenEmail(Context,String,int,String,String,boolean)",121,134
+xwiki__xwiki-commons_CVE-2023-31126_14.10.3,xwiki-commons-core/xwiki-commons-xml/src/main/java/org/xwiki/xml/internal/html/SecureHTMLElementSanitizer.java,SecureHTMLElementSanitizer,isAttributeAllowed,"boolean isAttributeAllowed(String,String,String)",178,193
+xwiki__xwiki-commons_CVE-2023-36471_14.10.5,xwiki-commons-core/xwiki-commons-xml/src/main/java/org/xwiki/xml/internal/html/HTMLDefinitions.java,HTMLDefinitions,HTMLDefinitions,HTMLDefinitions(),61,90
+xwiki__xwiki-rendering_CVE-2023-37908_14.10.3,xwiki-rendering-xml/src/main/java/org/xwiki/rendering/renderer/printer/XHTMLWikiPrinter.java,XHTMLWikiPrinter,cleanAttributes,"Attributes cleanAttributes(String elementName, Attributes attributes)",319,350
+jmrozanec__cron-utils_CVE-2021-41269_9.1.5,src/main/java/com/cronutils/validation/CronValidator.java,CronValidator,isValid,"boolean isValid(String,ConstraintValidatorContext)",21,34
+asf__commons-text_CVE-2022-42889_1.9,src/main/java/org/apache/commons/text/lookup/StringLookupFactory.java,StringLookupFactory,addDefaultStringLookups,void addDefaultStringLookups(Map),445,449
+codecentric__spring-boot-admin_CVE-2022-46166_2.6.9,spring-boot-admin-server/src/main/java/de/codecentric/boot/admin/server/notify/TelegramNotifier.java,TelegramNotifier,getText,"String getText(InstanceEvent,Instance)",105,112

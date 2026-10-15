@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import subprocess as sp
 import pandas as pd
 import shutil
@@ -19,7 +20,7 @@ THIS_SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 IRIS_ROOT_DIR = os.path.abspath(f"{THIS_SCRIPT_DIR}/../")
 sys.path.append(IRIS_ROOT_DIR)
 
-from src.config import CODEQL_DIR, CODEQL_DB_PATH, PACKAGE_MODULES_PATH, OUTPUT_DIR, ALL_METHOD_INFO_DIR, PROJECT_SOURCE_CODE_DIR, CVES_MAPPED_W_COMMITS_DIR, CODEQL_QUERY_VERSION
+from src.config import CODEQL_DIR, CODEQL_BIN, CODEQL_DB_PATH, PACKAGE_MODULES_PATH, OUTPUT_DIR, ALL_METHOD_INFO_DIR, PROJECT_SOURCE_CODE_DIR, CVES_MAPPED_W_COMMITS_DIR, CODEQL_QUERY_VERSION
 
 
 from src.logger import Logger
@@ -40,7 +41,7 @@ from src.modules.evaluation_pipeline import EvaluationPipeline
 
 from src.models.llm import LLM
 
-CODEQL = f"{CODEQL_DIR}/codeql"
+CODEQL = CODEQL_BIN
 
 PRIMITIVE_TYPES = set([
     "void",
@@ -127,6 +128,15 @@ class SAPipeline:
         self.test_run = test_run
         self.no_logger = no_logger
         self.use_container = use_container
+        self.start_time = time.time()
+        try:
+            try:
+                from models.gemini import GeminiModel
+            except ImportError:
+                from src.models.gemini import GeminiModel
+            GeminiModel.reset_token_usage()
+        except Exception:
+            pass
 
         # Setup logger
         if not self.no_logger:
@@ -1318,6 +1328,34 @@ dependencies:
 
         # 10. Debuggging
         self.debug_result()
+
+        # 11. Finalize metrics: Execution time & Token usage
+        elapsed_time = round(time.time() - self.start_time, 2)
+        token_usage = {"prompt_tokens": 0, "candidate_tokens": 0, "total_tokens": 0}
+        try:
+            try:
+                from models.gemini import GeminiModel
+            except ImportError:
+                from src.models.gemini import GeminiModel
+            token_usage = GeminiModel.get_token_usage()
+        except Exception:
+            pass
+
+        if os.path.exists(self.final_output_json_path):
+            try:
+                with open(self.final_output_json_path, "r", encoding="utf-8") as f:
+                    res_data = json.load(f)
+                res_data["execution_time_seconds"] = elapsed_time
+                res_data["token_usage"] = token_usage
+                with open(self.final_output_json_path, "w", encoding="utf-8") as f:
+                    json.dump(res_data, f, indent=2)
+            except Exception as e:
+                if self.project_logger:
+                    self.project_logger.error(f"Failed to write metrics to results.json: {e}")
+
+        if self.project_logger:
+            self.project_logger.info(f"==> Total Execution Time: {elapsed_time}s")
+            self.project_logger.info(f"==> Total Token Usage: {token_usage}")
 
 
 if __name__ == '__main__':

@@ -7,8 +7,12 @@ import sys
 import json
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.config import CODEQL_DB_PATH, PROJECT_SOURCE_CODE_DIR, IRIS_ROOT_DIR, BUILD_INFO, DEP_CONFIGS, DATA_DIR, CODEQL_DIR, CVES_MAPPED_W_COMMITS_DIR
-from scripts.docker_utils import ensure_image, create_container, exec_in_container, parse_project_image, copy_dir_to_container, copy_from_container
+from src.config import CODEQL_DB_PATH, PROJECT_SOURCE_CODE_DIR, IRIS_ROOT_DIR, BUILD_INFO, DEP_CONFIGS, DATA_DIR, CODEQL_DIR, CVES_MAPPED_W_COMMITS_DIR, CODEQL_BIN
+try:
+    from scripts.docker_utils import ensure_image, create_container, exec_in_container, parse_project_image, copy_dir_to_container, copy_from_container
+except ImportError:
+    pass
+
 ALLVERSIONS = json.load(open(DEP_CONFIGS))
 
 # Path to custom build commands CSV
@@ -40,30 +44,30 @@ def setup_environment(row):
     # Set Maven path
     mvn_version = row.get('mvn_version', 'n/a')
     if mvn_version != 'n/a':
-        MAVEN_PATH = ALLVERSIONS['mvn'].get(mvn_version, None)
-        if MAVEN_PATH:
-            env['PATH'] = f"{os.path.join(MAVEN_PATH, 'bin')}:{env.get('PATH', '')}"
+        MAVEN_PATH = ALLVERSIONS.get('mvn', {}).get(mvn_version, None)
+        if MAVEN_PATH and os.path.exists(MAVEN_PATH):
+            env['PATH'] = f"{os.path.join(MAVEN_PATH, 'bin')}{os.pathsep}{env.get('PATH', '')}"
             print(f"Maven path set to: {MAVEN_PATH}")
 
     # Set Gradle path
     gradle_version = row.get('gradle_version', 'n/a')
     if gradle_version != 'n/a':
-        GRADLE_PATH = ALLVERSIONS['gradle'].get(gradle_version, None)
-        if GRADLE_PATH:
-            env['PATH'] = f"{os.path.join(GRADLE_PATH, 'bin')}:{env.get('PATH', '')}"
+        GRADLE_PATH = ALLVERSIONS.get('gradle', {}).get(gradle_version, None)
+        if GRADLE_PATH and os.path.exists(GRADLE_PATH):
+            env['PATH'] = f"{os.path.join(GRADLE_PATH, 'bin')}{os.pathsep}{env.get('PATH', '')}"
             print(f"Gradle path set to: {GRADLE_PATH}")
 
     # Find and set Java home
-    java_version = row['jdk_version']
-    java_home = ALLVERSIONS['jdks'].get(java_version, None)
-    if not java_home:
-        raise Exception(f"Java version {java_version} not found in available installations.")
-
-    env['JAVA_HOME'] = java_home
-    print(f"JAVA_HOME set to: {java_home}")
-    
-    # Add Java binary to PATH
-    env['PATH'] = f"{os.path.join(java_home, 'bin')}:{env.get('PATH', '')}"
+    java_version = row.get('jdk_version', 'n/a')
+    java_home = ALLVERSIONS.get('jdks', {}).get(java_version, None)
+    if java_home and os.path.exists(java_home):
+        env['JAVA_HOME'] = java_home
+        env['PATH'] = f"{os.path.join(java_home, 'bin')}{os.pathsep}{env.get('PATH', '')}"
+        print(f"JAVA_HOME set to: {java_home}")
+    elif 'JAVA_HOME' in env:
+        print(f"Using system JAVA_HOME: {env['JAVA_HOME']}")
+    else:
+        print("Using system default Java and Maven from PATH")
     
     return env
 
@@ -90,7 +94,7 @@ def create_codeql_database(project_slug, env, db_base_path, sources_base_path):
     Path(database_path).parent.mkdir(parents=True, exist_ok=True)
     
     command = [
-        "codeql", "database", "create",
+        CODEQL_BIN, "database", "create",
         database_path,
         "--source-root", source_path,
         "--language", "java",

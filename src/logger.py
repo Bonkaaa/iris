@@ -3,10 +3,10 @@ import os
 
 class Logger:
     def __init__(self, logdir):
-        self.logdir = logdir
+        self.logdir = os.path.abspath(logdir)
         os.makedirs(self.logdir, exist_ok=True)
-        t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self._logfile=f"{self.logdir}/log{t}.txt"
+        t = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self._logfile = os.path.join(self.logdir, f"log{t}.txt")
 
     def log(self, message, logtype="info", phase="", no_new_line=False, printonly=False):
         message=str(message)

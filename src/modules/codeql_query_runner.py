@@ -11,10 +11,10 @@ import copy
 import math
 import random
 
-from src.config import CODEQL_DIR
+from src.config import CODEQL_DIR, CODEQL_BIN
 from src.queries import QUERIES
 
-CODEQL = f"{CODEQL_DIR}/codeql"
+CODEQL = CODEQL_BIN
 
 ENTRY_SCRIPT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../")
 

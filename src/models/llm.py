@@ -1,6 +1,13 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSeq2SeqLM
-import transformers
-import torch
+try:
+    from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSeq2SeqLM
+    import transformers
+    import torch
+except ImportError:
+    AutoTokenizer = None
+    AutoModelForCausalLM = None
+    AutoModelForSeq2SeqLM = None
+    transformers = None
+    torch = None
 import models.config as config
 from utils.mylogger import MyLogger
 import os

@@ -3,3 +3,10 @@ codeql*
 log
 *.zip
 codeql/
+.venv/
+.git/
+z_data/project-sources/
+z_data/codeql-dbs/
+output/
+__pycache__/
+*.pyc

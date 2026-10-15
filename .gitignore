@@ -10,3 +10,8 @@ data/build-info/
 data/project-sources
 log/
 config.json
+.env
+.venv/
+z_data/*
+!z_data/*.csv
+!z_data/*.md
